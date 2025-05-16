@@ -1,0 +1,6 @@
+function(c_cpp_template_enable_coverage project)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+    target_compile_options(${project} INTERFACE --coverage -O0 -g)
+    target_link_libraries(${project} INTERFACE --coverage)
+  endif()
+endfunction()

@@ -1,0 +1,88 @@
+# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+# You may wish to alter this file to override the set of languages analyzed,
+# or to provide custom queries or build logic.
+#
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
+name: "CodeQL"
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [main, dev]
+  schedule:
+    - cron: "38 0 * * 5"
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["c-cpp"]
+        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby' ]
+        # Learn more about CodeQL language support at https://git.io/codeql-language-support
+        compiler:
+          - gcc-13
+        cmake_preset:
+          - "unixlike-gcc-debug"
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Cache
+        uses: ./.github/actions/linux_setup_cache
+        with:
+          compiler: ${{ matrix.compiler }}
+          cmake_preset: ${{ matrix.cmake_preset }}
+
+      - name: Project Name
+        uses: cardinalby/export-env-action@v2
+        with:
+          envFile: ".github/constants.env"
+
+      - name: Setup Tools
+        working-directory: ./scripts
+        run: |
+          ./setup.sh
+
+      - name: Project setup
+        run: |
+          tsx project.mts setup ${{matrix.cmake_preset}} --enableSanitizerAddress=OFF
+
+      - name: Cmake configure
+        run: |
+          tsx project.mts config
+
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # If you wish to specify custom queries, you can do so here or in a config file.
+          # By default, queries listed here will override any specified in a config file.
+          # Prefix the list here with "+" to use these queries and those in the config file.
+          # queries: ./path/to/local/query, your-org/your-repo/queries@main
+
+      - name: Cmake build
+        run: |
+          tsx project.mts build
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
