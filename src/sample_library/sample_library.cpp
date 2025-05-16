@@ -1,4 +1,4 @@
-#include <c_cpp_template/sample_library.hpp>
+#include <simple_calculator/sample_library.hpp>
 
 int factorial( int input ) noexcept {
     int result = 1;

@@ -6,8 +6,8 @@ find_package(dbg-macro REQUIRED)
 find_package(CLI11 REQUIRED)
 find_package(OpenCV REQUIRED)
 
-target_link_libraries(intro PRIVATE c_cpp_template::c_cpp_template_options
-                                          c_cpp_template::c_cpp_template_warnings)
+target_link_libraries(intro PRIVATE simple_calculator::simple_calculator_options
+                                          simple_calculator::simple_calculator_warnings)
 target_link_system_libraries(
   intro
   PRIVATE

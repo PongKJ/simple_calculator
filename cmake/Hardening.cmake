@@ -1,7 +1,7 @@
 include(CheckCXXCompilerFlag)
 
 macro(
-  c_cpp_template_enable_hardening
+  simple_calculator_enable_hardening
   target
   global
   ubsan_minimal_runtime)

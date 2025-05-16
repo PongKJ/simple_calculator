@@ -1,4 +1,4 @@
-macro(c_cpp_template_configure_linker project)
+macro(simple_calculator_configure_linker project)
   include(CheckCXXCompilerFlag)
 
   set(USER_LINKER_OPTION
@@ -22,7 +22,7 @@ macro(c_cpp_template_configure_linker project)
         "Using custom linker: '${USER_LINKER_OPTION}', explicitly supported entries are ${USER_LINKER_OPTION_VALUES}")
   endif()
 
-  if(NOT c_cpp_template_ENABLE_USER_LINKER)
+  if(NOT simple_calculator_ENABLE_USER_LINKER)
     return()
   endif()
 

@@ -7,9 +7,9 @@ project(CmakeConfigPackageTests LANGUAGES CXX)
 if(PROJECT_IS_TOP_LEVEL OR TEST_INSTALLED_VERSION)
   enable_testing()
 
-  find_package(c_cpp_template CONFIG REQUIRED) # for intro, project_options, ...
+  find_package(simple_calculator CONFIG REQUIRED) # for intro, project_options, ...
 
-  if(NOT TARGET c_cpp_template_options)
+  if(NOT TARGET simple_calculator_options)
     message(FATAL_ERROR "Required config package not found!")
     return() # be strictly paranoid for Template Janitor github action! CK
   endif()
@@ -32,18 +32,18 @@ set_tests_properties(cli.version_matches PROPERTIES PASS_REGULAR_EXPRESSION "${P
 add_executable(tests tests.cpp)
 target_link_libraries(
   tests
-  PRIVATE c_cpp_template::c_cpp_template_options
-          c_cpp_template::c_cpp_template_warnings
+  PRIVATE simple_calculator::simple_calculator_options
+          simple_calculator::simple_calculator_warnings
           gtest::gtest
-          c_cpp_template::sample_library)
+          simple_calculator::sample_library)
 
 add_executable(constexpr_tests constexpr_tests.cpp)
 target_link_libraries(
   constexpr_tests
-  PRIVATE c_cpp_template::c_cpp_template_options
-          c_cpp_template::c_cpp_template_warnings
+  PRIVATE simple_calculator::simple_calculator_options
+          simple_calculator::simple_calculator_warnings
           gtest::gtest
-          c_cpp_template::sample_library)
+          simple_calculator::sample_library)
 
 if(NOT CMAKE_CROSSCOMPILING)
   # Only when not cross-compiling, we can use gtest_discover_tests

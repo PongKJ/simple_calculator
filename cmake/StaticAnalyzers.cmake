@@ -1,4 +1,4 @@
-macro(c_cpp_template_enable_cppcheck WARNINGS_AS_ERRORS CPPCHECK_OPTIONS)
+macro(simple_calculator_enable_cppcheck WARNINGS_AS_ERRORS CPPCHECK_OPTIONS)
   find_program(CPPCHECK cppcheck)
   if(CPPCHECK)
 
@@ -49,7 +49,7 @@ macro(c_cpp_template_enable_cppcheck WARNINGS_AS_ERRORS CPPCHECK_OPTIONS)
   endif()
 endmacro()
 
-macro(c_cpp_template_enable_clang_tidy target WARNINGS_AS_ERRORS)
+macro(simple_calculator_enable_clang_tidy target WARNINGS_AS_ERRORS)
 
   find_program(CLANGTIDY clang-tidy)
   if(CLANGTIDY)
@@ -102,7 +102,7 @@ macro(c_cpp_template_enable_clang_tidy target WARNINGS_AS_ERRORS)
   endif()
 endmacro()
 
-macro(c_cpp_template_enable_include_what_you_use)
+macro(simple_calculator_enable_include_what_you_use)
   find_program(INCLUDE_WHAT_YOU_USE include-what-you-use)
   if(INCLUDE_WHAT_YOU_USE)
     set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${INCLUDE_WHAT_YOU_USE})
