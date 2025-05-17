@@ -98,7 +98,7 @@ include(cmake/PackageProject.cmake)
 # know we want to ship
 simple_calculator_package_project(
   TARGETS
-  intro
+  gui
   # simple_calculator_options
   # simple_calculator_warnings
   # FIXME: this does not work! CK PRIVATE_DEPENDENCIES_CONFIGURED project_options project_warnings

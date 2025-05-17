@@ -19,18 +19,13 @@ class ConanApplication(ConanFile):
         tc.generate()
 
     def requirements(self):
-        # requirements = self.conan_data.get("requirements", [])
-        # for requirement in requirements:
-        #     self.requires(requirement)
         self.requires("fmt/10.2.1")
         self.requires("gtest/1.15.0")
         self.requires("spdlog/1.14.1")
-        self.requires("jsoncpp/1.9.6")
         self.requires("dbg-macro/0.5.1")
-        self.requires("opencv/4.10.0")
-        # self.requires("boost/1.86.0")
-        self.requires("cli11/2.4.2")
+        self.requires("qt/6.6.3")
 
     def configure(self):
-        self.options["opencv"].shared = True
-        self.options["opencv"].with_wayland = False
+        self.options["qt"].shared = True
+        # BUG: Not support run on wauland yet
+        self.options["qt"].qtwayland = True

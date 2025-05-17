@@ -7,7 +7,7 @@ import { setupMSVCDevCmd } from './scripts/setupMSVCDev.mts'
 import { checkCmds, loadFromJson, saveToJson, replaceJsonNode } from './scripts/utils.mts'
 
 // Do Not show call backtrace on error
-const NoCallstackOnError = false
+const NoCallstackOnError = true
 
 const cachePath = '.project_cache.json'
 const presetsFilePath = 'CMakePresets.json'
