@@ -7,14 +7,14 @@
             "program": "./out/build/unixlike-gcc-release/bin/gui",
             "args": [],
             "env": {
-                "M4": "/home/pkj/.conan2/p/b/m43a4a47c6eba4c/p/bin/m4",
-                "DYLD_LIBRARY_PATH": "/home/pkj/.conan2/p/b/qt4d7977e8bb9f0/p/lib:/home/pkj/.conan2/p/b/qt4d7977e8bb9f0/p/plugins/imageformats:/home/pkj/.conan2/p/b/qt4d7977e8bb9f0/p/plugins/platforms:/home/pkj/.conan2/p/b/qt4d7977e8bb9f0/p/plugins/sqldrivers:",
-                "ACLOCAL_PATH": ":/home/pkj/.conan2/p/b/libto287308e5a91bb/p/res/aclocal",
+                "M4": "/home/pkj/.conan2/p/b/m4f3ef3a65c6377/p/bin/m4",
+                "DYLD_LIBRARY_PATH": "/home/pkj/.conan2/p/b/qtc8994ee4815b2/p/lib:/home/pkj/.conan2/p/b/qtc8994ee4815b2/p/plugins/imageformats:/home/pkj/.conan2/p/b/qtc8994ee4815b2/p/plugins/platforms:/home/pkj/.conan2/p/b/qtc8994ee4815b2/p/plugins/sqldrivers:",
+                "ACLOCAL_PATH": ":/home/pkj/.conan2/p/b/libto038f863b60366/p/res/aclocal",
                 "SHLVL": "2",
-                "AUTOMAKE_CONAN_INCLUDES": ":/home/pkj/.conan2/p/b/libto287308e5a91bb/p/res/aclocal",
-                "LD_LIBRARY_PATH": "/home/pkj/.conan2/p/b/qt4d7977e8bb9f0/p/lib:/home/pkj/.conan2/p/b/qt4d7977e8bb9f0/p/plugins/imageformats:/home/pkj/.conan2/p/b/qt4d7977e8bb9f0/p/plugins/platforms:/home/pkj/.conan2/p/b/qt4d7977e8bb9f0/p/plugins/sqldrivers:",
-                "PATH": "/home/pkj/.conan2/p/b/qt4d7977e8bb9f0/p/bin:/home/pkj/.conan2/p/autom480a421c82a75/p/bin:/home/pkj/.conan2/p/autocf2af015330354/p/bin:/home/pkj/.conan2/p/b/m43a4a47c6eba4c/p/bin:/home/pkj/.console-ninja/.bin:/opt/nvim-linux64/bin:/home/pkj/.local/bin:/home/pkj/.pyenv/shims:/home/pkj/.pyenv/bin:/home/pkj/.cache/antibody/https-COLON--SLASH--SLASH-github.com-SLASH-caarlos0-SLASH-zsh-open-pr:/home/pkj/.cache/antibody/https-COLON--SLASH--SLASH-github.com-SLASH-caarlos0-SLASH-zsh-git-sync:/home/pkj/.cache/antibody/https-COLON--SLASH--SLASH-github.com-SLASH-caarlos0-SLASH-zsh-git-fetch-merge:/home/pkj/.cache/antibody/https-COLON--SLASH--SLASH-github.com-SLASH-caarlos0-SLASH-ports:/home/pkj/.krew/bin:/home/pkj/.local/share/nvim/mason/bin:/home/pkj/.nvm/versions/node/v22.9.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/pkj/Project/Go/bin:/home/pkj/.rbenv/bin:/home/pkj/.dotfiles/bin:/home/pkj/.bin",
-                "QT_PLUGIN_PATH": "/home/pkj/.conan2/p/b/qt4d7977e8bb9f0/p/plugins"
+                "AUTOMAKE_CONAN_INCLUDES": ":/home/pkj/.conan2/p/b/libto038f863b60366/p/res/aclocal",
+                "LD_LIBRARY_PATH": "/home/pkj/.conan2/p/b/qtc8994ee4815b2/p/lib:/home/pkj/.conan2/p/b/qtc8994ee4815b2/p/plugins/imageformats:/home/pkj/.conan2/p/b/qtc8994ee4815b2/p/plugins/platforms:/home/pkj/.conan2/p/b/qtc8994ee4815b2/p/plugins/sqldrivers:",
+                "PATH": "/home/pkj/.conan2/p/b/qtc8994ee4815b2/p/bin:/home/pkj/.conan2/p/autom480a421c82a75/p/bin:/home/pkj/.conan2/p/autocf2af015330354/p/bin:/home/pkj/.conan2/p/b/m4f3ef3a65c6377/p/bin:/home/pkj/.console-ninja/.bin:/opt/nvim-linux64/bin:/home/pkj/.local/bin:/home/pkj/.pyenv/shims:/home/pkj/.pyenv/bin:/home/pkj/.cache/antibody/https-COLON--SLASH--SLASH-github.com-SLASH-caarlos0-SLASH-zsh-open-pr:/home/pkj/.cache/antibody/https-COLON--SLASH--SLASH-github.com-SLASH-caarlos0-SLASH-zsh-git-sync:/home/pkj/.cache/antibody/https-COLON--SLASH--SLASH-github.com-SLASH-caarlos0-SLASH-zsh-git-fetch-merge:/home/pkj/.cache/antibody/https-COLON--SLASH--SLASH-github.com-SLASH-caarlos0-SLASH-ports:/home/pkj/.krew/bin:/home/pkj/.local/share/nvim/mason/bin:/home/pkj/.nvm/versions/node/v22.9.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/pkj/Project/Go/bin:/home/pkj/.rbenv/bin:/home/pkj/.dotfiles/bin:/home/pkj/.bin",
+                "QT_PLUGIN_PATH": "/home/pkj/.conan2/p/b/qtc8994ee4815b2/p/plugins"
             }
         }
     ]

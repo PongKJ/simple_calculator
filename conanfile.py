@@ -27,5 +27,5 @@ class ConanApplication(ConanFile):
 
     def configure(self):
         self.options["qt"].shared = True
-        # BUG: Not support run on wauland yet
-        self.options["qt"].qtwayland = True
+        if self.settings.os == "Linux":
+            self.options["qt"].qtwayland = True
