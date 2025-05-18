@@ -1,6 +1,7 @@
 #include "mainwindow.hpp"
 
 #include <qcontainerfwd.h>
+#include <qfont.h>
 #include <qlogging.h>
 #include <qobject.h>
 #include <qsizepolicy.h>
@@ -10,6 +11,7 @@
 #include <QTextCursor>
 #include <QTextDocument>
 #include <format>
+#include <iostream>
 
 MainWindow::MainWindow( QWidget* parent ) : QMainWindow( parent ) {
     // 设置窗口标题和大小
@@ -37,7 +39,7 @@ MainWindow::MainWindow( QWidget* parent ) : QMainWindow( parent ) {
     	"cos","7", "8", "9","*",
         "sqrt","4","5","6","-",
         "^","1", "2","3","+",
-        "mod","±",".", "0","=" };
+        "tan","%","0", ".","=" };
     // clang-format on
 
     // 添加按钮到布局
@@ -48,16 +50,17 @@ MainWindow::MainWindow( QWidget* parent ) : QMainWindow( parent ) {
 
         auto* button = new QPushButton( buttonLabels[ i ] );
         button->setSizePolicy( sizePolicy );
+        auto font = button->font();
+        font.setPointSize( 16 );
+        button->setFont( font );
 
         layout->addWidget( button, row, col );
 
         // 连接按钮点击信号到槽函数
         connect( button, &QPushButton::clicked, this, &MainWindow::onButtonClicked );
     }
-    layout->setSpacing( 0 );
-    layout->setHorizontalSpacing( 1 );
-    layout->setVerticalSpacing( 1 );
-    layout->setContentsMargins( 20, 20, 20, 20 );
+    layout->setSpacing( 3 );
+    layout->setContentsMargins( 15, 15, 15, 15 );
 }
 
 MainWindow::~MainWindow() {
@@ -72,37 +75,44 @@ void MainWindow::onButtonClicked() {
     QString buttonText  = button->text();
     QString displayText = displayer->getExpressionLine();
 
-    // Clear last result
-
     if ( buttonText == "C" ) {
         displayer->clearDisplay();
     }
     else if ( buttonText == "=" ) {
         displayText = displayText + "=";
         displayer->setExpression( displayText );
+        // replace utf-8 "π" with "pi"
+        displayText.replace( "π", "pi" );
         try {
             double result = calculator->doIt( displayText.toStdString() );
-            // display->setText( displayText.append( QString::number( result ) ) );
             displayer->setResult( QString::number( result ) );
         }
         catch ( const std::exception& e ) {
-            // display->setText( QString::fromStdString( format( "Error:{}", e.what() ) ) );
-            displayer->setResult( QString::fromStdString( format( "Error:{}", e.what() ) ) );
+            std::cerr << "Error: " << e.what() << std::endl;
+            displayer->setResult( QString::fromStdString( format( "Bad expression" ) ) );
         }
-    }
-    else if ( buttonText == "⌫" ) {
-        if ( !displayText.isEmpty() ) {
-            displayText.chop( 1 );
-            // display->setText( displayText );
-            displayer->setExpression( displayText );
-        }
-    }
-    else if ( buttonText == "sin" || buttonText == "cos" || buttonText == "sqrt" ) {
-        // display->setText( displayText + buttonText + "(" );
-        displayer->setExpression( displayText + buttonText + "(" );
     }
     else {
-        // display->setText( displayText + buttonText );
-        displayer->setExpression( displayText + buttonText );
+        if ( displayText.contains( "=" ) ) {
+            // Clear last calculate result
+            displayText.clear();
+            displayer->clearDisplay();
+        }
+        if ( buttonText == "⌫" ) {
+            if ( !displayText.isEmpty() ) {
+                displayText.chop( 1 );
+                displayer->setExpression( displayText );
+            }
+        }
+        else if ( buttonText == "sin" || buttonText == "cos" || buttonText == "sqrt" || buttonText == "tan"
+                  || buttonText == "log" ) {
+            displayer->setExpression( displayText + buttonText + "(" );
+        }
+        else if ( buttonText == "n!" ) {
+            displayer->setExpression( displayText + "!" );
+        }
+        else {
+            displayer->setExpression( displayText + buttonText );
+        }
     }
 }

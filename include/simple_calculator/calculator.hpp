@@ -1,7 +1,9 @@
 #pragma once
+#include <algorithm>
 #include <cmath>
 #include <format>
 #include <iostream>
+#include <numbers>
 #include <string>
 
 #include "stack.hpp"
@@ -17,13 +19,13 @@ private:
         if ( str == "+" || str == "-" ) {
             return 0;
         }
-        else if ( str == "*" || str == "/" ) {
+        else if ( str == "*" || str == "/" || str == "%" ) {
             return 1;
         }
         else if ( str == "^" ) {
             return 2;
         }
-        else if ( str == "sin" || str == "cos" || str == "tan" || str == "sqrt" ) {
+        else if ( str == "sin" || str == "cos" || str == "tan" || str == "sqrt" || str == "log" || str == "!" ) {
             return 3;
         }
         else {
@@ -31,7 +33,7 @@ private:
         }
     }
     static bool isBinary( const string& opr ) {
-        return opr == "+" || opr == "-" || opr == "*" || opr == "/" || opr == "^";
+        return opr == "+" || opr == "-" || opr == "*" || opr == "/" || opr == "^" || opr == "%";
     }
     static double readNum( string::const_iterator& it ) {
         string t;
@@ -39,10 +41,25 @@ private:
             t += *it++;
         return stod( t );
     }
-    static string readOperator( string::const_iterator& it ) {
-        const string opr[] = { "+", "-", "*", "/", "^", "sin", "cos", "tan", "sqrt" };
+    static double readConstant( string::const_iterator& it ) {
+        if ( string( it, it + 2 ) == "pi" ) {
+            it += 2;
+            return numbers::pi;
+        }
+        else if ( string( it, it + 1 ) == "e" ) {
+            it += 1;
+            return numbers::e;
+        }
+        throw invalid_argument( format( "invalid constant start on:'{}'", *it ) );
+    }
+    static string readOperator( string::const_iterator& it, string::difference_type max_len ) {
+        const string opr[] = { "+", "-", "*", "/", "^", "sin", "cos", "tan", "sqrt", "log", "%", "!" };
         for ( const auto& o : opr ) {
-            auto len = static_cast< long >( o.length() );
+            auto len = static_cast< string::difference_type >( o.length() );
+            if ( len >= max_len ) {
+                // 如果剩余字符长度小于操作符长度，直接跳过
+                continue;
+            }
             if ( string( it, it + len ) == o ) {
                 it += len;
                 return o;
@@ -61,7 +78,20 @@ private:
         double rhs = m_num.top();
         m_num.pop();
         if ( isBinary( m_opr.top() ) ) {
-            // TODO: refactor this
+            if ( m_num.empty() ) {
+                if ( m_opr.top() == "-" ) {
+                    // Deal with the minus sign rather than the subtraction sign.
+                    m_num.push( -rhs );
+                }
+                else if ( m_opr.top() == "+" ) {
+                    m_num.push( rhs );
+                }
+                else {
+                    throw invalid_argument( format( "invalid expression" ) );
+                }
+                m_opr.pop();
+                return;
+            }
             double lhs = m_num.top();
             m_num.pop();
             if ( m_opr.top() == "+" ) {
@@ -84,6 +114,10 @@ private:
                 m_num.push( std::pow( lhs, rhs ) );
                 cout << "calc:" << lhs << "^" << rhs << "=" << m_num.top() << endl;
             }
+            else if ( m_opr.top() == "%" ) {
+                m_num.push( std::fmod( lhs, rhs ) );
+                cout << "calc:" << lhs << "%" << rhs << "=" << m_num.top() << endl;
+            }
         }
         else {
             if ( m_opr.top() == "sin" ) {
@@ -102,6 +136,36 @@ private:
                 m_num.push( std::sqrt( rhs ) );
                 cout << "calc:sqrt(" << rhs << ")" << "=" << m_num.top() << endl;
             }
+            else if ( m_opr.top() == "log" ) {
+                // TODO: Make it support mutable base
+                // inline double log_base(double value, double base) {
+                //      return std::log(value) / std::log(base);
+                //  }
+                m_num.push( std::log( rhs ) );
+                cout << "calc:log(" << rhs << ")" << "=" << m_num.top() << endl;
+            }
+            else if ( m_opr.top() == "!" ) {
+                cout << "calc:" << rhs << "!" << endl;
+                if ( rhs == 0 ) {
+                    m_num.push( 1 );
+                }
+                else {
+                    // NOTE: Factorial is only defined for non-negative integers
+                    if ( rhs < 0 || std::floor( rhs ) != rhs ) {
+                        throw invalid_argument(
+                            format( "calculate factorial only defined for non-negative integers found :'{}!'", rhs ) );
+                    }
+                    double result = 1;
+                    for ( int i = 1; i <= rhs; ++i ) {
+                        result *= i;
+                    }
+                    m_num.push( result );
+                }
+                cout << "calc:" << rhs << "! " << "=" << m_num.top() << endl;
+            }
+            else {
+                throw invalid_argument( format( "invalid operator:'{}'", m_opr.top() ) );
+            }
         }
         m_opr.pop();
     }
@@ -109,29 +173,34 @@ private:
         return ( *c >= '0' && *c <= '9' ) || *c == '.';
     }
 
-    static bool isPi( string::const_iterator& c ) {
-        return *c == 'p' && *( c + 1 ) == 'i';
+    static bool isConstant( string::const_iterator& c ) {
+        // NOTE: Before calculating pi, we need to replace utf-8 "π" with "pi"
+        return string( c, c + 2 ) == "pi" || string( c, c + 1 ) == "e";
     }
 
 public:
     Calculator() = default;
-    double doIt( const string& exp ) {
+    double doIt( const string& _expression ) {
+        // Clear the stacks
         m_num.clear();
+        m_opr.clear();
         // 处理空字符串
-        if ( exp.empty() ) {
+        if ( _expression.empty() ) {
             return 0;
         }
+        // 处理空格
+        string expression = _expression;
+        expression.erase( std::remove( expression.begin(), expression.end(), ' ' ), expression.end() );
         // 处理不以等号结尾的表达式
-        if ( exp.back() != '=' ) {
+        if ( expression.back() != '=' ) {
             throw invalid_argument( "expression should end with '='" );
         }
-        for ( auto it = exp.begin(); it != exp.end(); ) {
+        for ( auto it = expression.cbegin(); it != expression.cend(); ) {
             if ( isNum( it ) ) {
                 m_num.push( readNum( it ) );
             }
-            else if ( isPi( it ) ) {
-                m_num.push( std::atan( 1.0 ) * 4 );
-                it += 2;
+            else if ( isConstant( it ) ) {
+                m_num.push( readConstant( it ) );
             }
             else {
                 if ( *it == '=' ) {
@@ -158,10 +227,15 @@ public:
                     it++;
                 }
                 else {
-                    auto opr = readOperator( it );
+                    auto opr = readOperator( it, expression.cend() - it );
                     while ( !m_opr.empty() && m_opr.top() != "(" && precedence( opr ) <= precedence( m_opr.top() ) ) {
                         if ( isBinary( opr ) ) {
                             calculate();
+                        }
+                        if ( m_num.empty() ) {
+                            // If the number stack is empty, it means that the expression is invalid
+                            // To prevent forever looping, we'll throw an exception
+                            throw invalid_argument( "invalid expression" );
                         }
                     }
                     m_opr.push( opr );

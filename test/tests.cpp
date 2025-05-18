@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <simple_calculator/calculator.hpp>
 #include <cmath>
+#include <simple_calculator/calculator.hpp>
 #include <stdexcept>
 
 // 测试计算器功能
@@ -25,6 +25,16 @@ TEST( CalculatorTest, WithBrackets ) {
     EXPECT_EQ( c.doIt( "(1+2)*(3+4)/2*2=" ), 21 );
 }
 
+TEST( CalculatorTest, WithBlank ) {
+    Calculator c;
+    auto allow_error = std::numeric_limits< double >::digits10;
+    EXPECT_EQ( c.doIt( "1 + 2 =" ), 3 );
+    EXPECT_EQ( c.doIt( "2 - 1 =" ), 1 );
+    EXPECT_EQ( c.doIt( "1 * 2 =" ), 2 );
+    EXPECT_EQ( c.doIt( "2 / 1 =" ), 2 );
+    EXPECT_NEAR( c.doIt( "1 / 3 =" ), 1.0 / 3, allow_error );
+}
+
 TEST( CalculatorTest, SinCosTan ) {
     Calculator c;
     // 存在一定的精度误差
@@ -32,6 +42,7 @@ TEST( CalculatorTest, SinCosTan ) {
     EXPECT_NEAR( c.doIt( "sin(pi/2)=" ), 1, allow_error );
     EXPECT_NEAR( c.doIt( "sin(pi/3)=" ), sqrt( 3 ) / 2, allow_error );
     EXPECT_NEAR( c.doIt( "(1+cos(pi/3))*2=" ), 3, allow_error );
+    EXPECT_NEAR( c.doIt( "(1+tan(pi/4))*2=" ), 4, allow_error );
 }
 
 TEST( CalculatorTest, Sqrt ) {
@@ -42,6 +53,41 @@ TEST( CalculatorTest, Sqrt ) {
     EXPECT_EQ( c.doIt( "sqrt(9)=" ), 3 );
     EXPECT_NEAR( c.doIt( "sqrt(2)=" ), sqrt( 2 ), allow_error );
     EXPECT_NEAR( c.doIt( "(1+sqrt(3))*2=" ), ( 1 + sqrt( 3 ) ) * 2, allow_error );
+}
+
+TEST( CalculatorTest, Log ) {
+    Calculator c;
+    // 存在一定的精度误差
+    auto allow_error = std::numeric_limits< double >::digits10;
+    EXPECT_NEAR( c.doIt( "log(1)=" ), 0, allow_error );
+    EXPECT_NEAR( c.doIt( "log(e)=" ), 1, allow_error );
+    EXPECT_NEAR( c.doIt( "log(2)=" ), log( 2 ), allow_error );
+    EXPECT_NEAR( c.doIt( "log(3)=" ), log( 3 ), allow_error );
+    EXPECT_NEAR( c.doIt( "2*(1+log(4))=" ), 2 * ( 1 + log( 4 ) ), allow_error );
+}
+
+TEST( CalculatorTest, Mod ) {
+    Calculator c;
+    EXPECT_EQ( c.doIt( "1%2=" ), 1 );
+    EXPECT_EQ( c.doIt( "2%1=" ), 0 );
+    EXPECT_EQ( c.doIt( "3%2=" ), 1 );
+    EXPECT_EQ( c.doIt( "4%3=" ), 1 );
+    EXPECT_EQ( c.doIt( "2*(5%4+2)=" ), 6 );
+}
+
+TEST( CalculatorTest, Factorial ) {
+    Calculator c;
+    EXPECT_EQ( c.doIt( "0! =" ), 1 );
+    EXPECT_EQ( c.doIt( "1! =" ), 1 );
+    EXPECT_EQ( c.doIt( "2! =" ), 2 );
+    EXPECT_EQ( c.doIt( "3! =" ), 6 );
+    EXPECT_EQ( c.doIt( "4! =" ), 24 );
+    EXPECT_EQ( c.doIt( "1+3*5! =" ), 361 );
+    EXPECT_EQ( c.doIt( "1+3*(1+5)! =" ), 2161 );
+    // TODO: solvle the precision problem:
+    // "calculate factorial only defined for non-negative integers found :'1.0000000000000002!'"
+    EXPECT_EQ( c.doIt( "1+(2*cos(pi/3))! =" ), 2 );
+    EXPECT_EQ( c.doIt( "(1+2*sin(pi/6))! =" ), 2 );
 }
 
 TEST( CalculatorTest, Square ) {
@@ -79,4 +125,5 @@ TEST( CalculatorTest, InvalidInput ) {
     EXPECT_NO_THROW( c.doIt( "1+2*3=" ) );
     EXPECT_THROW( c.doIt( "1+2*3" ), invalid_argument );
     EXPECT_THROW( c.doIt( "1+2*3=1+2*3" ), invalid_argument );
+    EXPECT_THROW( c.doIt( "!!" ), invalid_argument );
 }
