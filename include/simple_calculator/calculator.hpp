@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 #include <format>
 #include <iostream>
 #include <numbers>
@@ -151,9 +152,18 @@ private:
                 }
                 else {
                     // NOTE: Factorial is only defined for non-negative integers
-                    if ( rhs < 0 || std::floor( rhs ) != rhs ) {
+                    auto allow_error = std::numeric_limits< double >::digits10;
+                    if ( rhs < 0 ) {
                         throw invalid_argument(
-                            format( "calculate factorial only defined for non-negative integers found :'{}!'", rhs ) );
+                            format( "calculate factorial only defined for non-negative number, found :'{}!'", rhs ) );
+                    }
+                    if ( abs( std::floor( rhs ) - rhs ) > allow_error ) {
+                        throw invalid_argument(
+                            format( "calculate factorial only defined for integers, found :'{}!'", rhs ) );
+                    }
+                    else {
+                        // There is some accuracy error in the double type, so we need to round it
+                        rhs = std::round( rhs );
                     }
                     double result = 1;
                     for ( int i = 1; i <= rhs; ++i ) {
