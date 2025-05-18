@@ -15,7 +15,6 @@ public:
 
 private:
     Displayer* displayer;
-    Calculator*calculator;
 
 private slots:
     void onButtonClicked();

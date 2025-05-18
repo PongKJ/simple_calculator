@@ -23,8 +23,6 @@ MainWindow::MainWindow( QWidget* parent ) : QMainWindow( parent ) {
     setCentralWidget( centralWidget );
     auto* layout = new QGridLayout( centralWidget );
 
-    calculator = new Calculator();
-
     // 创建显示区域
     displayer = new Displayer( this );
     displayer->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
@@ -63,9 +61,7 @@ MainWindow::MainWindow( QWidget* parent ) : QMainWindow( parent ) {
     layout->setContentsMargins( 15, 15, 15, 15 );
 }
 
-MainWindow::~MainWindow() {
-    delete calculator;
-};
+MainWindow::~MainWindow() = default;
 
 void MainWindow::onButtonClicked() {
     auto* button = qobject_cast< QPushButton* >( sender() );
@@ -79,17 +75,19 @@ void MainWindow::onButtonClicked() {
         displayer->clearDisplay();
     }
     else if ( buttonText == "=" ) {
-        displayText = displayText + "=";
-        displayer->setExpression( displayText );
+        displayer->setExpression( displayText + "=" );
         // replace utf-8 "π" with "pi"
         displayText.replace( "π", "pi" );
         try {
-            double result = calculator->doIt( displayText.toStdString() );
+            Lexer lexer( displayText.toStdString() );
+            Parser parser( lexer );
+            auto ast      = parser.expression();
+            double result = ast->evaluate();
             displayer->setResult( QString::number( result ) );
         }
         catch ( const std::exception& e ) {
             std::cerr << "Error: " << e.what() << std::endl;
-            displayer->setResult( QString::fromStdString( format( "Bad expression" ) ) );
+            displayer->setResult( QString::fromStdString( std::format( "Bad expression" ) ) );
         }
     }
     else {
