@@ -6,6 +6,7 @@
 #include <iostream>
 #include <numbers>
 #include <string>
+#include <utility>
 
 #include "stack.hpp"
 
@@ -42,16 +43,21 @@ private:
             t += *it++;
         return stod( t );
     }
-    static double readConstant( string::const_iterator& it ) {
-        if ( string( it, it + 2 ) == "pi" ) {
-            it += 2;
-            return numbers::pi;
+    static double readConstant( string::const_iterator& it, string::difference_type max_len ) {
+        const pair< string, double > consts[] = { std::make_pair( "pi", numbers::pi ),
+                                                  std::make_pair( "e", numbers::e ) };
+        for ( const auto& c : consts ) {
+            auto len = static_cast< string::difference_type >( c.first.length() );
+            if ( len >= max_len ) {
+                // 如果剩余字符长度小于常量长度，直接跳过
+                continue;
+            }
+            if ( string( it, it + len ) == c.first ) {
+                it += len;
+                return c.second;
+            }
         }
-        else if ( string( it, it + 1 ) == "e" ) {
-            it += 1;
-            return numbers::e;
-        }
-        throw invalid_argument( format( "invalid constant start on:'{}'", *it ) );
+        throw invalid_argument( format( "invalid operator start on:'{}'", *it ) );
     }
     static string readOperator( string::const_iterator& it, string::difference_type max_len ) {
         const string opr[] = { "+", "-", "*", "/", "^", "sin", "cos", "tan", "sqrt", "log", "%", "!" };
@@ -184,8 +190,8 @@ private:
     }
 
     static bool isConstant( string::const_iterator& c ) {
-        // NOTE: Before calculating pi, we need to replace utf-8 "π" with "pi"
-        return string( c, c + 2 ) == "pi" || string( c, c + 1 ) == "e";
+        // NOTE: Before calculating, we need to replace utf-8 "π" with "pi"
+        return *c == 'e' || ( *c == 'p' && *( c + 1 ) == 'i' );
     }
 
 public:
@@ -210,7 +216,7 @@ public:
                 m_num.push( readNum( it ) );
             }
             else if ( isConstant( it ) ) {
-                m_num.push( readConstant( it ) );
+                m_num.push( readConstant( it, expression.cend() - it ) );
             }
             else {
                 if ( *it == '=' ) {
