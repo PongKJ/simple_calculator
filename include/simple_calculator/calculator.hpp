@@ -250,7 +250,7 @@ public:
                         }
                         if ( m_num.empty() ) {
                             // If the number stack is empty, it means that the expression is invalid
-                            // To prevent forever looping, we'll throw an exception
+                            // To prevent forever looping, we throw an exception here
                             throw invalid_argument( "invalid expression" );
                         }
                     }

@@ -110,9 +110,9 @@ TEST( CalculatorTest, DotSupport ) {
 
 TEST( CalculatorTest, UnmatchBrackets ) {
     Calculator c;
-    // 允许左括号不匹配，这时相当于括号不起作用
+    // 允许左括号不匹配
     EXPECT_EQ( c.doIt( "(1+2*3=" ), 7 );
-    EXPECT_EQ( c.doIt( "1*(2+3=" ), 5 );
+    EXPECT_EQ( c.doIt( "2*(2+3=" ), 10 );
     // 不允许右括号不匹配，抛出异常
     EXPECT_THROW( c.doIt( "1+2*3)=" ), invalid_argument );
 }

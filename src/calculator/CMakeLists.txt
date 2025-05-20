@@ -1,6 +1,6 @@
 include(GenerateExportHeader)
 
-add_library(calculator calculator.cpp)
+add_library(calculator calculator.cc)
 add_library(simple_calculator::calculator ALIAS calculator)
 target_link_libraries(calculator PRIVATE simple_calculator_options
 simple_calculator_warnings)
