@@ -34,7 +34,7 @@ MainWindow::MainWindow( QWidget* parent ) : QMainWindow( parent ) {
     // 创建按钮
     // clang-format off
     QStringList buttonLabels = {
-    	"log","π","e","C","⌫",
+    	"lg","π","e","C","⌫",
     	"sin","(", ")","n!","/",
     	"cos","7", "8", "9","*",
         "sqrt","4","5","6","-",
@@ -105,7 +105,7 @@ void MainWindow::onButtonClicked() {
             }
         }
         else if ( buttonText == "sin" || buttonText == "cos" || buttonText == "sqrt" || buttonText == "tan"
-                  || buttonText == "log" ) {
+                  || buttonText == "lg" ) {
             displayer->setExpression( displayText + buttonText + "(" );
         }
         else if ( buttonText == "n!" ) {

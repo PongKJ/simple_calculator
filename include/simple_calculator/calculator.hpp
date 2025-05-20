@@ -27,7 +27,7 @@ private:
         else if ( str == "^" ) {
             return 2;
         }
-        else if ( str == "sin" || str == "cos" || str == "tan" || str == "sqrt" || str == "log" || str == "!" ) {
+        else if ( str == "sin" || str == "cos" || str == "tan" || str == "sqrt" || str == "lg" || str == "!" ) {
             return 3;
         }
         else {
@@ -60,7 +60,7 @@ private:
         throw invalid_argument( format( "invalid operator start on:'{}'", *it ) );
     }
     static string readOperator( string::const_iterator& it, string::difference_type max_len ) {
-        const string opr[] = { "+", "-", "*", "/", "^", "sin", "cos", "tan", "sqrt", "log", "%", "!" };
+        const string opr[] = { "+", "-", "*", "/", "^", "sin", "cos", "tan", "sqrt", "lg", "%", "!" };
         for ( const auto& o : opr ) {
             auto len = static_cast< string::difference_type >( o.length() );
             if ( len >= max_len ) {
@@ -143,13 +143,13 @@ private:
                 m_num.push( std::sqrt( rhs ) );
                 cout << "calc:sqrt(" << rhs << ")" << "=" << m_num.top() << endl;
             }
-            else if ( m_opr.top() == "log" ) {
+            else if ( m_opr.top() == "lg" ) {
                 // TODO: Make it support mutable base
-                // inline double log_base(double value, double base) {
-                //      return std::log(value) / std::log(base);
+                // inline double lg_base(double value, double base) {
+                //      return std::log10(value) / std::log10(base);
                 //  }
-                m_num.push( std::log( rhs ) );
-                cout << "calc:log(" << rhs << ")" << "=" << m_num.top() << endl;
+                m_num.push( std::log10( rhs ) );
+                cout << "calc:lg(" << rhs << ")" << "=" << m_num.top() << endl;
             }
             else if ( m_opr.top() == "!" ) {
                 cout << "calc:" << rhs << "!" << endl;

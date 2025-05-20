@@ -55,15 +55,15 @@ TEST( CalculatorTest, Sqrt ) {
     EXPECT_NEAR( c.doIt( "(1+sqrt(3))*2=" ), ( 1 + sqrt( 3 ) ) * 2, allow_error );
 }
 
-TEST( CalculatorTest, Log ) {
+TEST( CalculatorTest, Lg ) {
     Calculator c;
     // 存在一定的精度误差
     auto allow_error = std::numeric_limits< double >::digits10;
-    EXPECT_NEAR( c.doIt( "log(1)=" ), 0, allow_error );
-    EXPECT_NEAR( c.doIt( "log(e)=" ), 1, allow_error );
-    EXPECT_NEAR( c.doIt( "log(2)=" ), log( 2 ), allow_error );
-    EXPECT_NEAR( c.doIt( "log(3)=" ), log( 3 ), allow_error );
-    EXPECT_NEAR( c.doIt( "2*(1+log(4))=" ), 2 * ( 1 + log( 4 ) ), allow_error );
+    EXPECT_NEAR( c.doIt( "lg(1)=" ), 0, allow_error );
+    EXPECT_NEAR( c.doIt( "lg(e)=" ), 1, allow_error );
+    EXPECT_NEAR( c.doIt( "lg(2)=" ), log10( 2 ), allow_error );
+    EXPECT_NEAR( c.doIt( "lg(3)=" ), log10( 3 ), allow_error );
+    EXPECT_NEAR( c.doIt( "2*(1+lg(4))=" ), 2 * ( 1 + log10( 4 ) ), allow_error );
 }
 
 TEST( CalculatorTest, Mod ) {
@@ -84,8 +84,6 @@ TEST( CalculatorTest, Factorial ) {
     EXPECT_EQ( c.doIt( "4! =" ), 24 );
     EXPECT_EQ( c.doIt( "1+3*5! =" ), 361 );
     EXPECT_EQ( c.doIt( "1+3*(1+5)! =" ), 2161 );
-    // TODO: solvle the precision problem:
-    // "calculate factorial only defined for non-negative integers found :'1.0000000000000002!'"
     EXPECT_EQ( c.doIt( "1+(2*cos(pi/3))! =" ), 2 );
     EXPECT_EQ( c.doIt( "(1+2*sin(pi/6))! =" ), 2 );
 }
