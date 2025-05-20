@@ -9,9 +9,11 @@ on:
     branches:
       - main
       - dev
+      - ast
 permissions:
   contents: write
 # env:
+
 jobs:
   build:
     runs-on: ubuntu-24.04
