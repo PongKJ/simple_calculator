@@ -1,4 +1,8 @@
+
 #include <cctype>
+#include <cmath>
+#include <format>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -65,7 +69,138 @@ public:
     }
 };
 
-enum class TokenType { NUMBER, OP_PLUS, OP_MINUS, OP_MUL, OP_DIV, LPAREN, RPAREN, END };
+class PowerNode : public BinaryOpNode {
+public:
+    using BinaryOpNode::BinaryOpNode;
+    [[nodiscard]] double evaluate() const override {
+        return std::pow( left->evaluate(), right->evaluate() );
+    }
+};
+
+class ModuloNode : public BinaryOpNode {
+public:
+    using BinaryOpNode::BinaryOpNode;
+    [[nodiscard]] double evaluate() const override {
+        double divisor = right->evaluate();
+        if ( divisor == 0 )
+            throw std::runtime_error( "Modulo by zero" );
+        return std::fmod( left->evaluate(), divisor );
+    }
+};
+
+class UnaryFunctionNode : public ASTNode {
+protected:
+    std::unique_ptr< ASTNode > operand;
+
+public:
+    explicit UnaryFunctionNode( std::unique_ptr< ASTNode > op ) : operand( std::move( op ) ) {}
+};
+
+class SqrtNode : public UnaryFunctionNode {
+public:
+    using UnaryFunctionNode::UnaryFunctionNode;
+    [[nodiscard]] double evaluate() const override {
+        double val = operand->evaluate();
+        if ( val < 0 )
+            throw std::runtime_error( "Square root of negative number" );
+        return std::sqrt( val );
+    }
+};
+
+class SinNode : public UnaryFunctionNode {
+public:
+    using UnaryFunctionNode::UnaryFunctionNode;
+    [[nodiscard]] double evaluate() const override {
+        return std::sin( operand->evaluate() );
+    }
+};
+
+class CosNode : public UnaryFunctionNode {
+public:
+    using UnaryFunctionNode::UnaryFunctionNode;
+    [[nodiscard]] double evaluate() const override {
+        return std::cos( operand->evaluate() );
+    }
+};
+
+class TanNode : public UnaryFunctionNode {
+public:
+    using UnaryFunctionNode::UnaryFunctionNode;
+    [[nodiscard]] double evaluate() const override {
+        // Basic check for undefined points, though floating point precision makes exact checks hard.
+        // cos(x) = 0 for x = PI/2 + k*PI
+        double val = operand->evaluate();
+        if ( std::cos( val ) == 0 )  // This check might be problematic with floating point numbers
+            throw std::runtime_error( "Tangent undefined (division by zero)" );
+        return std::tan( val );
+    }
+};
+
+class LgNode : public UnaryFunctionNode {
+public:
+    using UnaryFunctionNode::UnaryFunctionNode;
+    [[nodiscard]] double evaluate() const override {
+        double val = operand->evaluate();
+        if ( val <= 0 )
+            throw std::runtime_error( "Logarithm of non-positive number" );
+        return std::log10( val );
+    }
+};
+
+class LnNode : public UnaryFunctionNode {
+public:
+    using UnaryFunctionNode::UnaryFunctionNode;
+    [[nodiscard]] double evaluate() const override {
+        double val = operand->evaluate();
+        if ( val <= 0 )
+            throw std::runtime_error( "Natural logarithm of non-positive number" );
+        return std::log( val );
+    }
+};
+
+class FactorialNode : public UnaryFunctionNode {
+public:
+    using UnaryFunctionNode::UnaryFunctionNode;
+    [[nodiscard]] double evaluate() const override {
+        double val = operand->evaluate();
+        // Factorial is only defined for non-negative integers
+        if ( val < 0 )
+            throw std::runtime_error( "Factorial of negative number" );
+
+        // Check if the value is very close to an integer
+        double intPart;
+        if ( std::abs( std::modf( val, &intPart ) ) > 1e-10 )
+            throw std::runtime_error( "Factorial only defined for non-negative integers" );
+
+        auto n        = static_cast< unsigned int >( intPart );
+        double result = 1.0;
+        for ( unsigned int i = 2; i <= n; ++i )
+            result *= i;
+        return result;
+    }
+};
+
+enum class TokenType {
+    NUMBER,
+    OP_PLUS,
+    OP_MINUS,
+    OP_MUL,
+    OP_DIV,
+    OP_POW,
+    OP_MOD,
+    OP_FACTORIAL,
+    LPAREN,
+    RPAREN,
+    FUNC_SQRT,
+    FUNC_SIN,
+    FUNC_COS,
+    FUNC_TAN,
+    FUNC_LG,
+    FUNC_LN,
+    CONST_PI,
+    CONST_E,
+    END
+};
 
 struct Token {
     TokenType type;
@@ -99,6 +234,31 @@ public:
             return Token( std::stod( input.substr( start, pos - start ) ) );
         }
 
+        if ( std::isalpha( c ) ) {
+            size_t start = pos - 1;
+            while ( pos < input.size() && std::isalpha( input[ pos ] ) ) {
+                pos++;
+            }
+            std::string identifier = input.substr( start, pos - start );
+            if ( identifier == "sqrt" )
+                return Token( TokenType::FUNC_SQRT );
+            if ( identifier == "sin" )
+                return Token( TokenType::FUNC_SIN );
+            if ( identifier == "cos" )
+                return Token( TokenType::FUNC_COS );
+            if ( identifier == "tan" )
+                return Token( TokenType::FUNC_TAN );
+            if ( identifier == "lg" )
+                return Token( TokenType::FUNC_LG );
+            if ( identifier == "ln" )
+                return Token( TokenType::FUNC_LN );
+            if ( identifier == "pi" )
+                return Token( TokenType::CONST_PI );
+            if ( identifier == "e" )
+                return Token( TokenType::CONST_E );
+            throw std::runtime_error( "Unknown identifier: " + identifier );
+        }
+
         switch ( c ) {
         case '+':
             return Token( TokenType::OP_PLUS );
@@ -108,6 +268,12 @@ public:
             return Token( TokenType::OP_MUL );
         case '/':
             return Token( TokenType::OP_DIV );
+        case '^':
+            return Token( TokenType::OP_POW );
+        case '%':
+            return Token( TokenType::OP_MOD );
+        case '!':
+            return Token( TokenType::OP_FACTORIAL );
         case '(':
             return Token( TokenType::LPAREN );
         case ')':
@@ -137,37 +303,115 @@ class Parser {
             eat( TokenType::NUMBER );
             return std::make_unique< NumberNode >( token.value );
         }
+        else if ( token.type == TokenType::CONST_PI ) {
+            eat( TokenType::CONST_PI );
+            return std::make_unique< NumberNode >( M_PI );
+        }
+        else if ( token.type == TokenType::CONST_E ) {
+            eat( TokenType::CONST_E );
+            return std::make_unique< NumberNode >( M_E );
+        }
         else if ( token.type == TokenType::LPAREN ) {
             eat( TokenType::LPAREN );
             auto node = expression();
             eat( TokenType::RPAREN );
             return node;
         }
-        else if ( token.type == TokenType::OP_MINUS ) {
+        else if ( token.type == TokenType::OP_MINUS ) {  // Unary minus
             eat( TokenType::OP_MINUS );
             return std::make_unique< SubtractNode >( std::make_unique< NumberNode >( 0 ), factor() );
+        }
+        else if ( token.type == TokenType::OP_PLUS ) {  // Unary plus
+            eat( TokenType::OP_PLUS );
+            return factor();
+        }
+        else if ( token.type == TokenType::FUNC_SQRT ) {
+            eat( TokenType::FUNC_SQRT );
+            eat( TokenType::LPAREN );
+            auto arg = expression();
+            eat( TokenType::RPAREN );
+            return std::make_unique< SqrtNode >( std::move( arg ) );
+        }
+        else if ( token.type == TokenType::FUNC_SIN ) {
+            eat( TokenType::FUNC_SIN );
+            eat( TokenType::LPAREN );
+            auto arg = expression();
+            eat( TokenType::RPAREN );
+            return std::make_unique< SinNode >( std::move( arg ) );
+        }
+        else if ( token.type == TokenType::FUNC_COS ) {
+            eat( TokenType::FUNC_COS );
+            eat( TokenType::LPAREN );
+            auto arg = expression();
+            eat( TokenType::RPAREN );
+            return std::make_unique< CosNode >( std::move( arg ) );
+        }
+        else if ( token.type == TokenType::FUNC_TAN ) {
+            eat( TokenType::FUNC_TAN );
+            eat( TokenType::LPAREN );
+            auto arg = expression();
+            eat( TokenType::RPAREN );
+            return std::make_unique< TanNode >( std::move( arg ) );
+        }
+        else if ( token.type == TokenType::FUNC_LG ) {
+            eat( TokenType::FUNC_LG );
+            eat( TokenType::LPAREN );
+            auto arg = expression();
+            eat( TokenType::RPAREN );
+            return std::make_unique< LgNode >( std::move( arg ) );
+        }
+        else if ( token.type == TokenType::FUNC_LN ) {
+            eat( TokenType::FUNC_LN );
+            eat( TokenType::LPAREN );
+            auto arg = expression();
+            eat( TokenType::RPAREN );
+            return std::make_unique< LnNode >( std::move( arg ) );
         }
         throw std::runtime_error( "Invalid factor" );
     }
 
-    std::unique_ptr< ASTNode > term() {
+    // INFO:优先级按照调用链排列，最先被调用的优先级最低，按照优先级从低到高排列如下:
+    // expression() → term() → power_expression() → factorial_expression() → factor()
+
+    std::unique_ptr< ASTNode > factorial_expression() {
         auto node = factor();
-        while ( currentToken.type == TokenType::OP_MUL || currentToken.type == TokenType::OP_DIV ) {
-            Token op = currentToken;
-            if ( op.type == TokenType::OP_MUL ) {
-                eat( TokenType::OP_MUL );
-                node = std::make_unique< MultiplyNode >( std::move( node ), factor() );
-            }
-            else {
-                eat( TokenType::OP_DIV );
-                node = std::make_unique< DivideNode >( std::move( node ), factor() );
-            }
+        if ( currentToken.type == TokenType::OP_FACTORIAL ) {
+            eat( TokenType::OP_FACTORIAL );
+            return std::make_unique< FactorialNode >( std::move( node ) );
         }
         return node;
     }
 
-public:
-    explicit Parser( Lexer& l ) : lexer( l ), currentToken( l.nextToken() ) {}
+    // New method for power operations (right-associative)
+    std::unique_ptr< ASTNode > power_expression() {
+        auto node = factorial_expression();
+        if ( currentToken.type == TokenType::OP_POW ) {
+            eat( TokenType::OP_POW );
+            return std::make_unique< PowerNode >( std::move( node ), power_expression() );
+        }
+        return node;
+    }
+
+    std::unique_ptr< ASTNode > term() {
+        auto node = power_expression();  // term now calls power_expression
+        while ( currentToken.type == TokenType::OP_MUL || currentToken.type == TokenType::OP_DIV
+                || currentToken.type == TokenType::OP_MOD ) {
+            Token op = currentToken;
+            if ( op.type == TokenType::OP_MUL ) {
+                eat( TokenType::OP_MUL );
+                node = std::make_unique< MultiplyNode >( std::move( node ), power_expression() );
+            }
+            else if ( op.type == TokenType::OP_DIV ) {
+                eat( TokenType::OP_DIV );
+                node = std::make_unique< DivideNode >( std::move( node ), power_expression() );
+            }
+            else {  // OP_MOD
+                eat( TokenType::OP_MOD );
+                node = std::make_unique< ModuloNode >( std::move( node ), power_expression() );
+            }
+        }
+        return node;
+    }
 
     std::unique_ptr< ASTNode > expression() {
         auto node = term();
@@ -181,6 +425,23 @@ public:
                 eat( TokenType::OP_MINUS );
                 node = std::make_unique< SubtractNode >( std::move( node ), term() );
             }
+        }
+        return node;
+    }
+
+public:
+    explicit Parser( Lexer& l ) : lexer( l ), currentToken( l.nextToken() ) {}
+
+    std::unique_ptr< ASTNode > parse() {
+        // handle empty input
+        if ( currentToken.type == TokenType::END ) {
+            return std::make_unique< NumberNode >( NumberNode( 0 ) );
+        }
+        auto node = expression();
+        // Check that we've reached the end of input
+        if ( currentToken.type != TokenType::END ) {
+            throw std::runtime_error(
+                std::format( "Unexpected token after expression: {}", static_cast< int >( currentToken.type ) ) );
         }
         return node;
     }

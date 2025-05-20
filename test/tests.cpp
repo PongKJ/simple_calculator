@@ -1,129 +1,282 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <map>
 #include <simple_calculator/calculator.hpp>
 #include <stdexcept>
+#include <string>
 
 // 测试计算器功能
 TEST( CalculatorTest, BasicOperator ) {
-    Calculator c;
-    EXPECT_EQ( c.doIt( "1+2=" ), 3 );
-    EXPECT_EQ( c.doIt( "2-1=" ), 1 );
-    EXPECT_EQ( c.doIt( "1*2=" ), 2 );
-    EXPECT_EQ( c.doIt( "2/1=" ), 2 );
-    // 存在误差的除法
+    // clang-format off
+    auto parses = std::map< std::string, double >{
+        { "1+2", 3 },
+		{ "2-1", 1 },
+		{ "1*2", 2 },
+		{ "2/1", 2 },
+		{ "1/3", 1.0 / 3 },
+		{ "1+2", 3 },
+		{ "2-1", 1 },
+    };
+    // clang-format on
     auto allow_error = std::numeric_limits< double >::digits10;
-    EXPECT_NEAR( c.doIt( "1/3=" ), 1.0 / 3, allow_error );
+    for ( auto& e : parses ) {
+        Lexer lexer( e.first );
+        Parser parser( lexer );
+        auto ast      = parser.parse();
+        double result = ast->evaluate();
+        EXPECT_NEAR( result, e.second, allow_error );
+    }
 }
 
 TEST( CalculatorTest, WithBrackets ) {
-    Calculator c;
-    EXPECT_EQ( c.doIt( "1+(2+3)=" ), 6 );
-    EXPECT_EQ( c.doIt( "(1+2)*3=" ), 9 );
-    EXPECT_EQ( c.doIt( "(1+2)*(3+4)=" ), 21 );
-    EXPECT_EQ( c.doIt( "(1+2)*(3+4)/2=" ), 10.5 );
-    EXPECT_EQ( c.doIt( "(1+2)*(3+4)/2*2=" ), 21 );
+    // clang-format off
+    auto parses = std::map< std::string, double >{
+        { "1+(2+3)", 6 },
+        { "(1+2)*3", 9 },
+        { "(1+2)*(3+4)", 21 },
+        { "(1+2)*(3+4)/2", 10.5 },
+        { "(1+2)*(3+4)/2*2", 21 },
+    };
+    // clang-format on
+    auto allow_error = std::numeric_limits< double >::digits10;
+    for ( auto& e : parses ) {
+        Lexer lexer( e.first );
+        Parser parser( lexer );
+        auto ast      = parser.parse();
+        double result = ast->evaluate();
+        EXPECT_NEAR( result, e.second, allow_error );
+    }
 }
 
 TEST( CalculatorTest, WithBlank ) {
-    Calculator c;
+    // clang-format off
+    auto parses = std::map< std::string, double >{
+        { "1 + 2", 3 },
+        { "2 - 1", 1 },
+        { "1 * 2", 2 },
+        { "2 / 1", 2 },
+        { "1 / 3", 1.0 / 3 },
+    };
+    // clang-format on
     auto allow_error = std::numeric_limits< double >::digits10;
-    EXPECT_EQ( c.doIt( "1 + 2 =" ), 3 );
-    EXPECT_EQ( c.doIt( "2 - 1 =" ), 1 );
-    EXPECT_EQ( c.doIt( "1 * 2 =" ), 2 );
-    EXPECT_EQ( c.doIt( "2 / 1 =" ), 2 );
-    EXPECT_NEAR( c.doIt( "1 / 3 =" ), 1.0 / 3, allow_error );
+    for ( auto& e : parses ) {
+        Lexer lexer( e.first );
+        Parser parser( lexer );
+        auto ast      = parser.parse();
+        double result = ast->evaluate();
+        EXPECT_NEAR( result, e.second, allow_error );
+    }
 }
 
 TEST( CalculatorTest, SinCosTan ) {
-    Calculator c;
     // 存在一定的精度误差
     auto allow_error = std::numeric_limits< double >::digits10;
-    EXPECT_NEAR( c.doIt( "sin(pi/2)=" ), 1, allow_error );
-    EXPECT_NEAR( c.doIt( "sin(pi/3)=" ), sqrt( 3 ) / 2, allow_error );
-    EXPECT_NEAR( c.doIt( "(1+cos(pi/3))*2=" ), 3, allow_error );
-    EXPECT_NEAR( c.doIt( "(1+tan(pi/4))*2=" ), 4, allow_error );
+    // clang-format off
+    auto parses = std::map< std::string, double >{
+        { "sin(pi/2)", 1 },
+        { "sin(pi/3)", sqrt( 3 ) / 2 },
+        { "(1+cos(pi/3))*2", 3 },
+        { "(1+tan(pi/4))*2", 4 },
+    };
+    // clang-format on
+    for ( auto& e : parses ) {
+        Lexer lexer( e.first );
+        Parser parser( lexer );
+        auto ast      = parser.parse();
+        double result = ast->evaluate();
+        EXPECT_NEAR( result, e.second, allow_error );
+    }
 }
 
 TEST( CalculatorTest, Sqrt ) {
-    Calculator c;
     // 存在一定的精度误差
     auto allow_error = std::numeric_limits< double >::digits10;
-    EXPECT_EQ( c.doIt( "sqrt(4)=" ), 2 );
-    EXPECT_EQ( c.doIt( "sqrt(9)=" ), 3 );
-    EXPECT_NEAR( c.doIt( "sqrt(2)=" ), sqrt( 2 ), allow_error );
-    EXPECT_NEAR( c.doIt( "(1+sqrt(3))*2=" ), ( 1 + sqrt( 3 ) ) * 2, allow_error );
+    // clang-format off
+    auto parses = std::map< std::string, double >{
+        { "sqrt(4)", 2 },
+        { "sqrt(9)", 3 },
+        { "sqrt(2)", sqrt( 2 ) },
+        { "(1+sqrt(3))*2", ( 1 + sqrt( 3 ) ) * 2 },
+    };
+    // clang-format on
+    for ( auto& e : parses ) {
+        Lexer lexer( e.first );
+        Parser parser( lexer );
+        auto ast      = parser.parse();
+        double result = ast->evaluate();
+        EXPECT_NEAR( result, e.second, allow_error );
+    }
 }
 
-TEST( CalculatorTest, Log ) {
-    Calculator c;
+TEST( CalculatorTest, Lg ) {
     // 存在一定的精度误差
     auto allow_error = std::numeric_limits< double >::digits10;
-    EXPECT_NEAR( c.doIt( "log(1)=" ), 0, allow_error );
-    EXPECT_NEAR( c.doIt( "log(e)=" ), 1, allow_error );
-    EXPECT_NEAR( c.doIt( "log(2)=" ), log( 2 ), allow_error );
-    EXPECT_NEAR( c.doIt( "log(3)=" ), log( 3 ), allow_error );
-    EXPECT_NEAR( c.doIt( "2*(1+log(4))=" ), 2 * ( 1 + log( 4 ) ), allow_error );
+    // clang-format off
+    auto parses = std::map< std::string, double >{
+        { "lg(1)", 0 },
+        { "lg(e)", 1 },
+        { "lg(2)", log10( 2 ) },
+        { "lg(3)", log10( 3 ) },
+        { "2*(1+lg(4))", 2 * ( 1 + log10( 4 ) ) },
+    };
+    // clang-format on
+    for ( auto& e : parses ) {
+        Lexer lexer( e.first );
+        Parser parser( lexer );
+        auto ast      = parser.parse();
+        double result = ast->evaluate();
+        EXPECT_NEAR( result, e.second, allow_error );
+    }
+}
+
+TEST( CalculatorTest, Ln ) {
+    // 存在一定的精度误差
+    auto allow_error = std::numeric_limits< double >::digits10;
+    // clang-format off
+    auto parses = std::map< std::string, double >{
+        { "ln(1)", 0 },
+        { "ln(e)", 1 },
+        { "ln(2)", log( 2 ) },
+        { "ln(3)", log( 3 ) },
+        { "2*(1+ln(4))", 2 * ( 1 + log( 4 ) ) },
+    };
+    // clang-format on
+    for ( auto& e : parses ) {
+        Lexer lexer( e.first );
+        Parser parser( lexer );
+        auto ast      = parser.parse();
+        double result = ast->evaluate();
+        EXPECT_NEAR( result, e.second, allow_error );
+    }
 }
 
 TEST( CalculatorTest, Mod ) {
-    Calculator c;
-    EXPECT_EQ( c.doIt( "1%2=" ), 1 );
-    EXPECT_EQ( c.doIt( "2%1=" ), 0 );
-    EXPECT_EQ( c.doIt( "3%2=" ), 1 );
-    EXPECT_EQ( c.doIt( "4%3=" ), 1 );
-    EXPECT_EQ( c.doIt( "2*(5%4+2)=" ), 6 );
+    // clang-format off
+    auto parses = std::map< std::string, double >{
+        { "1%2", 1 },
+        { "2%1", 0 },
+        { "3%2", 1 },
+        { "4%3", 1 },
+        { "2*(5%4+2)", 6 },
+    };
+    // clang-format on
+    auto allow_error = std::numeric_limits< double >::digits10;
+    for ( auto& e : parses ) {
+        Lexer lexer( e.first );
+        Parser parser( lexer );
+        auto ast      = parser.parse();
+        double result = ast->evaluate();
+        EXPECT_NEAR( result, e.second, allow_error );
+    }
 }
 
 TEST( CalculatorTest, Factorial ) {
-    Calculator c;
-    EXPECT_EQ( c.doIt( "0! =" ), 1 );
-    EXPECT_EQ( c.doIt( "1! =" ), 1 );
-    EXPECT_EQ( c.doIt( "2! =" ), 2 );
-    EXPECT_EQ( c.doIt( "3! =" ), 6 );
-    EXPECT_EQ( c.doIt( "4! =" ), 24 );
-    EXPECT_EQ( c.doIt( "1+3*5! =" ), 361 );
-    EXPECT_EQ( c.doIt( "1+3*(1+5)! =" ), 2161 );
-    // TODO: solvle the precision problem:
-    // "calculate factorial only defined for non-negative integers found :'1.0000000000000002!'"
-    EXPECT_EQ( c.doIt( "1+(2*cos(pi/3))! =" ), 2 );
-    EXPECT_EQ( c.doIt( "(1+2*sin(pi/6))! =" ), 2 );
+    // clang-format off
+    auto parses = std::map< std::string, double >{
+        { "0!", 1 },
+        { "1!", 1 },
+        { "2!", 2 },
+        { "3!", 6 },
+        { "4!", 24 },
+        { "1+3*5!", 361 },
+        { "1+3*(1+5)!", 2161 },
+        { "1+(2*cos(pi/3))!", 2 },
+        { "(1+2*sin(pi/6))!", 2 },
+    };
+    // clang-format on
+    auto allow_error = std::numeric_limits< double >::digits10;
+    for ( auto& e : parses ) {
+        Lexer lexer( e.first );
+        Parser parser( lexer );
+        auto ast      = parser.parse();
+        double result = ast->evaluate();
+        EXPECT_NEAR( result, e.second, allow_error );
+    }
 }
 
 TEST( CalculatorTest, Square ) {
-    Calculator c;
-    EXPECT_EQ( c.doIt( "2^2=" ), 4 );
-    EXPECT_EQ( c.doIt( "3^3=" ), 27 );
-    EXPECT_EQ( c.doIt( "2*2^3=" ), 16 );
-    EXPECT_EQ( c.doIt( "(2*2)^2=" ), 16 );
+    // clang-format off
+    auto parses = std::map< std::string, double >{
+        { "2^2", 4 },
+        { "3^3", 27 },
+        { "2*2^3", 16 },
+        { "(2*2)^2", 16 },
+    };
+    // clang-format on
+    auto allow_error = std::numeric_limits< double >::digits10;
+    for ( auto& e : parses ) {
+        Lexer lexer( e.first );
+        Parser parser( lexer );
+        auto ast      = parser.parse();
+        double result = ast->evaluate();
+        EXPECT_NEAR( result, e.second, allow_error );
+    }
 }
 
 TEST( CalculatorTest, DotSupport ) {
-    Calculator c;
     // 测试小数点
-    EXPECT_EQ( c.doIt( "1.5+2.5=" ), 4 );
-    EXPECT_EQ( c.doIt( "1.5*2.5=" ), 3.75 );
-    EXPECT_EQ( c.doIt( "1.5/2.5=" ), 0.6 );
-    EXPECT_EQ( c.doIt( "1.5^2=" ), 2.25 );
-    EXPECT_EQ( c.doIt( "sqrt(4.0)=" ), 2 );
+    // clang-format off
+    auto parses = std::map< std::string, double >{
+        { "1.5+2.5", 4 },
+        { "1.5*2.5", 3.75 },
+        { "1.5/2.5", 0.6 },
+        { "1.5^2", 2.25 },
+        { "sqrt(4.0)", 2 },
+    };
+    // clang-format on
+    auto allow_error = std::numeric_limits< double >::digits10;
+    for ( auto& e : parses ) {
+        Lexer lexer( e.first );
+        Parser parser( lexer );
+        auto ast      = parser.parse();
+        double result = ast->evaluate();
+        EXPECT_NEAR( result, e.second, allow_error );
+    }
 }
 
 TEST( CalculatorTest, UnmatchBrackets ) {
-    Calculator c;
-    // 允许左括号不匹配，这时相当于括号不起作用
-    EXPECT_EQ( c.doIt( "(1+2*3=" ), 7 );
-    EXPECT_EQ( c.doIt( "1*(2+3=" ), 5 );
-    // 不允许右括号不匹配，抛出异常
-    EXPECT_THROW( c.doIt( "1+2*3)=" ), invalid_argument );
+    // 严格检查，不允许左括号不匹配
+    EXPECT_THROW(
+        {
+            Lexer lexer( "(1+2*3" );
+            Parser parser( lexer );
+            auto ast = parser.parse();
+            EXPECT_EQ( ast->evaluate(), 7 );
+        },
+        std::runtime_error );
+    EXPECT_THROW(
+        {
+            Lexer lexer( "1*(2+3" );
+            Parser parser( lexer );
+            auto ast = parser.parse();
+            EXPECT_EQ( ast->evaluate(), 5 );
+        },
+        std::runtime_error );
+    EXPECT_THROW(
+        {
+            Lexer lexer( "1+2*3)" );
+            Parser parser( lexer );
+            parser.parse();
+        },
+        std::runtime_error );
+}
+
+TEST( CalculatorTest, AllowEmptyInput ) {
+    // 允许输入空字符串
+    EXPECT_NO_THROW( {
+        Lexer lexer( "" );
+        Parser parser( lexer );
+        parser.parse();
+    } );
 }
 
 TEST( CalculatorTest, InvalidInput ) {
-    Calculator c;
-    // 允许输入空字符串
-    EXPECT_NO_THROW( c.doIt( "" ) );
-    // 必须以等号结尾(Mybe don't needed to check this, As we can ensure this in GUI layer)
-    EXPECT_NO_THROW( c.doIt( "1+2*3=" ) );
-    EXPECT_THROW( c.doIt( "1+2*3" ), invalid_argument );
-    EXPECT_THROW( c.doIt( "1+2*3=1+2*3" ), invalid_argument );
-    EXPECT_THROW( c.doIt( "!!" ), invalid_argument );
+    EXPECT_THROW(
+        {
+            Lexer lexer( "!!" );
+            Parser parser( lexer );
+            parser.parse();
+        },
+        std::runtime_error );
 }

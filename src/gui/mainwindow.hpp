@@ -4,6 +4,7 @@
 #include <QPushButton>
 #include <QTextEdit>
 #include <simple_calculator/calculator.hpp>
+
 #include "displayer.hpp"
 
 class MainWindow : public QMainWindow {
@@ -15,6 +16,8 @@ public:
 
 private:
     Displayer* displayer;
+    // For 'Ans' function
+    double lastResult = 0.0;
 
 private slots:
     void onButtonClicked();

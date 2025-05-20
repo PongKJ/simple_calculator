@@ -24,20 +24,21 @@ MainWindow::MainWindow( QWidget* parent ) : QMainWindow( parent ) {
     auto* layout = new QGridLayout( centralWidget );
 
     // 创建显示区域
-    displayer = new Displayer( this );
-    displayer->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+    this->displayer = new Displayer( this );
+    this->displayer->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
 
-    layout->addWidget( displayer, 0, 0, 1, 5 );
+    layout->addWidget( this->displayer, 0, 0, 1, 5 );
 
     // 创建按钮
     // clang-format off
     QStringList buttonLabels = {
-    	"log","π","e","C","⌫",
+    	"lg","ln","10^", "e^"," ",
+    	"π","e","Ans","C","⌫",
     	"sin","(", ")","n!","/",
     	"cos","7", "8", "9","*",
-        "sqrt","4","5","6","-",
+        "tan","4","5","6","-",
         "^","1", "2","3","+",
-        "tan","%","0", ".","=" };
+        "√","%","0", ".","=" };
     // clang-format on
 
     // 添加按钮到布局
@@ -69,48 +70,54 @@ void MainWindow::onButtonClicked() {
         return;
 
     QString buttonText  = button->text();
-    QString displayText = displayer->getExpressionLine();
+    QString displayText = this->displayer->getExpressionLine();
 
     if ( buttonText == "C" ) {
-        displayer->clearDisplay();
+        this->displayer->clearDisplay();
     }
     else if ( buttonText == "=" ) {
-        displayer->setExpression( displayText + "=" );
+        this->displayer->setExpression( displayText + "=" );
         // replace utf-8 "π" with "pi"
         displayText.replace( "π", "pi" );
+        // replace "√" with "sqrt"
+        displayText.replace( "√", "sqrt" );
+        // replace "Ans" with lastResult
+        displayText.replace( "Ans", QString::number( this->lastResult ) );
+        // start calculating
         try {
             Lexer lexer( displayText.toStdString() );
             Parser parser( lexer );
-            auto ast      = parser.expression();
-            double result = ast->evaluate();
-            displayer->setResult( QString::number( result ) );
+            auto ast         = parser.parse();
+            double result    = ast->evaluate();
+            this->lastResult = result;
+            this->displayer->setResult( QString::number( result ) );
         }
         catch ( const std::exception& e ) {
             std::cerr << "Error: " << e.what() << std::endl;
-            displayer->setResult( QString::fromStdString( std::format( "Bad expression" ) ) );
+            this->displayer->setResult( QString::fromStdString( std::format( "Bad expression" ) ) );
         }
     }
     else {
         if ( displayText.contains( "=" ) ) {
             // Clear last calculate result
             displayText.clear();
-            displayer->clearDisplay();
+            this->displayer->clearDisplay();
         }
         if ( buttonText == "⌫" ) {
             if ( !displayText.isEmpty() ) {
                 displayText.chop( 1 );
-                displayer->setExpression( displayText );
+                this->displayer->setExpression( displayText );
             }
         }
-        else if ( buttonText == "sin" || buttonText == "cos" || buttonText == "sqrt" || buttonText == "tan"
-                  || buttonText == "log" ) {
-            displayer->setExpression( displayText + buttonText + "(" );
+        else if ( buttonText == "sin" || buttonText == "cos" || buttonText == "√" || buttonText == "tan"
+                  || buttonText == "lg" || buttonText == "ln" || buttonText == "10^" || buttonText == "e^" ) {
+            this->displayer->setExpression( displayText + buttonText + "(" );
         }
         else if ( buttonText == "n!" ) {
-            displayer->setExpression( displayText + "!" );
+            this->displayer->setExpression( displayText + "!" );
         }
         else {
-            displayer->setExpression( displayText + buttonText );
+            this->displayer->setExpression( displayText + buttonText );
         }
     }
 }
