@@ -27,7 +27,6 @@ qt_generate_deploy_app_script(
   TARGET
   gui
   #NO_COMPILER_RUNTIME
-  NO_TRANSLATIONS
   OUTPUT_SCRIPT
   deploy_script)
 install(SCRIPT ${deploy_script})
