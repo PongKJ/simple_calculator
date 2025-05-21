@@ -4,6 +4,7 @@
 #include <format>
 #include <iostream>
 #include <memory>
+#include <numbers>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -305,11 +306,11 @@ class Parser {
         }
         else if ( token.type == TokenType::CONST_PI ) {
             eat( TokenType::CONST_PI );
-            return std::make_unique< NumberNode >( M_PI );
+            return std::make_unique< NumberNode >( std::numbers::pi );
         }
         else if ( token.type == TokenType::CONST_E ) {
             eat( TokenType::CONST_E );
-            return std::make_unique< NumberNode >( M_E );
+            return std::make_unique< NumberNode >( std::numbers::e );
         }
         else if ( token.type == TokenType::LPAREN ) {
             eat( TokenType::LPAREN );
