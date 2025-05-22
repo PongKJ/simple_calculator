@@ -1,8 +1,6 @@
-
 #include <cctype>
 #include <cmath>
 #include <format>
-#include <iostream>
 #include <memory>
 #include <numbers>
 #include <stdexcept>
@@ -181,27 +179,23 @@ public:
     }
 };
 
+// clang-format off
 enum class TokenType {
+    // 普通数字
     NUMBER,
-    OP_PLUS,
-    OP_MINUS,
-    OP_MUL,
-    OP_DIV,
-    OP_POW,
-    OP_MOD,
-    OP_FACTORIAL,
-    LPAREN,
-    RPAREN,
-    FUNC_SQRT,
-    FUNC_SIN,
-    FUNC_COS,
-    FUNC_TAN,
-    FUNC_LG,
-    FUNC_LN,
-    CONST_PI,
-    CONST_E,
+    // 运算符+,-,*,/,^,%,!
+    OP_PLUS,OP_MINUS,OP_MUL,OP_DIV,
+    OP_POW, OP_MOD,OP_FACTORIAL,
+    // 左右括号
+    LPAREN,RPAREN,
+    // 函数sqrt,sin,cos,tan,lg,ln
+    FUNC_SQRT,FUNC_SIN,FUNC_COS,FUNC_TAN,FUNC_LG,FUNC_LN,
+    // 常量pi,e
+    CONST_PI,CONST_E,
+    // 结束标志
     END
 };
+// clang-format on
 
 struct Token {
     TokenType type;
@@ -318,11 +312,11 @@ class Parser {
             eat( TokenType::RPAREN );
             return node;
         }
-        else if ( token.type == TokenType::OP_MINUS ) {  // Unary minus
+        else if ( token.type == TokenType::OP_MINUS ) {
             eat( TokenType::OP_MINUS );
             return std::make_unique< SubtractNode >( std::make_unique< NumberNode >( 0 ), factor() );
         }
-        else if ( token.type == TokenType::OP_PLUS ) {  // Unary plus
+        else if ( token.type == TokenType::OP_PLUS ) {
             eat( TokenType::OP_PLUS );
             return factor();
         }
