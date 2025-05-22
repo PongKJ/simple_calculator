@@ -126,10 +126,8 @@ class TanNode : public UnaryFunctionNode {
 public:
     using UnaryFunctionNode::UnaryFunctionNode;
     [[nodiscard]] double evaluate() const override {
-        // Basic check for undefined points, though floating point precision makes exact checks hard.
-        // cos(x) = 0 for x = PI/2 + k*PI
         double val = operand->evaluate();
-        if ( std::cos( val ) == 0 )  // This check might be problematic with floating point numbers
+        if ( std::cos( val ) == 0 )  
             throw std::runtime_error( "Tangent undefined (division by zero)" );
         return std::tan( val );
     }
@@ -367,7 +365,6 @@ class Parser {
 
     // INFO:优先级按照调用链排列，最先被调用的优先级最低，按照优先级从低到高排列如下:
     // expression() → term() → power_expression() → factorial_expression() → factor()
-
     std::unique_ptr< ASTNode > factorial_expression() {
         auto node = factor();
         if ( currentToken.type == TokenType::OP_FACTORIAL ) {
@@ -377,7 +374,6 @@ class Parser {
         return node;
     }
 
-    // New method for power operations (right-associative)
     std::unique_ptr< ASTNode > power_expression() {
         auto node = factorial_expression();
         if ( currentToken.type == TokenType::OP_POW ) {
@@ -388,7 +384,7 @@ class Parser {
     }
 
     std::unique_ptr< ASTNode > term() {
-        auto node = power_expression();  // term now calls power_expression
+        auto node = power_expression();  
         while ( currentToken.type == TokenType::OP_MUL || currentToken.type == TokenType::OP_DIV
                 || currentToken.type == TokenType::OP_MOD ) {
             Token op = currentToken;
@@ -400,7 +396,7 @@ class Parser {
                 eat( TokenType::OP_DIV );
                 node = std::make_unique< DivideNode >( std::move( node ), power_expression() );
             }
-            else {  // OP_MOD
+            else {  
                 eat( TokenType::OP_MOD );
                 node = std::make_unique< ModuloNode >( std::move( node ), power_expression() );
             }
