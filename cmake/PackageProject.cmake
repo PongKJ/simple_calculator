@@ -1,3 +1,10 @@
+# Cpack configuration
+if(WIN32)
+  set(CPACK_GENERATOR "ZIP")
+else()
+  set(CPACK_GENERATOR "TGZ")
+endif()
+
 # Uses ycm (permissive BSD-3-Clause license) and ForwardArguments (permissive MIT license)
 
 function(simple_calculator_package_project)
@@ -169,10 +176,9 @@ function(simple_calculator_package_project)
     [[^/usr/lib.*]]
     DIRECTORIES
     ${CONAN_RUNTIME_LIB_DIRS}
-    $ENV{PATH}) # For windows msvc, some dlls are not in the runtime lib dirs, but in the PATH
+    $ENV{PATH}) # Mainly for windows msvc, some dlls are not in the runtime lib dirs, but in the PATH
 
   # Specicially, we need do some copies for qt plugins libraries
-
   # NOTE: On linux, some bugs in the qt6 cmake deploy script, so we need to do it manually
   # See: https://doc.qt.io/qt-6/qt-generate-deploy-app-script.html,
   # But it doesn't copy plugins to the bin directory as expected
